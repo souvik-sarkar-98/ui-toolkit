@@ -1,0 +1,35 @@
+# Changesets npm publish via deploy-platform reusable-ci-publish.yml
+# (this workspace’s deploy-main repo).
+
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, stage]
+    paths-ignore:
+      - '.github/**'
+      - '.changeset/**'
+      
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish:
+    uses: nabarun-ngo/ngo-nabarun-deploy/.github/workflows/reusable-ci-publish.yml@main
+    with:
+      node_version: '22'
+      working_directory: '.'
+      npm_scope: '@ssui-toolkit'
+      version_command: 'npm run version-packages'
+      publish_to_npm: true
+      publish_command: ${{ github.ref_name == 'main' && 'npm run release' || 'npm run release:beta' }}
+      create_tags_and_releases: false
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

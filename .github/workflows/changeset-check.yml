@@ -1,0 +1,23 @@
+name: Changeset Check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - stage
+
+concurrency:
+  group: changeset-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  changeset-check:
+    uses: nabarun-ngo/ngo-nabarun-deploy/.github/workflows/reusable-ci-changeset-check.yml@main
+    with:
+      node_version: '22'
+      working_directory: '.'
+      packages_filter: 'packages/**'
